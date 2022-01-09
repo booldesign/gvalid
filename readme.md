@@ -21,12 +21,13 @@ import "github.com/booldesign/gvalid"
 | -             | 不校验                                         | valid:"-"                            |                                     
 | required      | 必填字段,且不能为零值                            | valid:"required"                    |
 | default       | 默认值,不和required共用,可用于非指针的基础类型 int/int64/string  | valid:"default"               |
+| trimSpace     | 去除空格                                       | valid:"trimSpace"               |
 |               |                                              |                                        |
-| gt            | int/int64/string/float64/float32/slice 大于   | valid:"gt=0"                        |
+| gt            | int/int64/string/float64/float32/slice/map/array 大于   | valid:"gt=0"                        |
 | gte           | 同上 大于等于                                   | valid:"gte=0"                       |
-| lt            | int/int64/string/float64/float32/slice 小于   | valid:"lt=10"                       |
+| lt            | int/int64/string/float64/float32/slice/map/array 小于   | valid:"lt=10"                       |
 | lte           | 同上 小于等于                                   | valid:"lte=10"                      |
-| len           | string/slice 指定长度                          | valid:"len=1"                       |
+| len           | string/slice/map/array 指定长度                          | valid:"len=1"                       |
 |               |                                              |                                        |
 | in            | 其中之一                                       | valid:"in=5 7 9"                     |
 | sin           | slice 都在可选范围 仅支持:[]string/[]int/[]int64 | valid:"sin=5 7 9"                    |
@@ -124,5 +125,5 @@ BenchmarkCustom-12      	  594772	      2034 ns/op
 BenchmarkNumeric-12     	 1000000	      1050 ns/op
 BenchmarkDefault-12     	 1000000	      1175 ns/op
 BenchmarkDistinct-12    	  942357	      1211 ns/op
-
+BenchmarkTrimSpace-12        1000000          1161 ns/op
 ```

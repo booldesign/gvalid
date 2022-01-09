@@ -1044,3 +1044,61 @@ func BenchmarkDistinct(b *testing.B) {
 	}
 	b.StopTimer()
 }
+
+func TestTrimSpace(t *testing.T) {
+	type WUser struct {
+		Name    string `valid:"trimSpace" name:"姓名"`
+		Content string `valid:"trimSpace" name:"内容"`
+	}
+
+	var u *WUser
+
+	switch mode {
+	case "FAIL":
+		return
+	default:
+		u = &WUser{
+			Name:    " Edison",
+			Content: "你好，gvalid ",
+		}
+	}
+
+	v := &Validation{}
+	b, err := v.Valid(u)
+	if err != nil {
+		t.Fatal("result err:", err)
+	}
+	if !b {
+		t.Fatal("result valid err:", v.ErrorsMap)
+	}
+
+	Convey("test trimSpace", t, func() {
+		So(u.Name, ShouldEqual, "Edison")
+		So(u.Content, ShouldEqual, "你好，gvalid")
+	})
+}
+
+func BenchmarkTrimSpace(b *testing.B) {
+	type WUser struct {
+		Name string `valid:"trimSpace" name:"姓名"`
+	}
+
+	var u *WUser
+
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		u = &WUser{
+			Name: " Edison",
+		}
+
+		v := &Validation{}
+		ret, err := v.Valid(u)
+		if err != nil {
+			b.Fatal("result err:", err)
+		}
+		if !ret {
+			b.Fatal("result valid err:", v.ErrorsMap)
+		}
+	}
+	b.StopTimer()
+}

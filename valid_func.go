@@ -57,7 +57,7 @@ func (valid *Validation) RuleRequired(tOf reflect.StructField, vOf reflect.Value
 // RuleGt 大于
 // 支持: int8, int32, int, int64,
 // float32, float64,
-// string, slice
+// string, slice, map, array
 func (valid *Validation) RuleGt(tOf reflect.StructField, vOf reflect.Value, size string) {
 	if vOf.IsZero() {
 		return
@@ -95,11 +95,11 @@ func (valid *Validation) RuleGt(tOf reflect.StructField, vOf reflect.Value, size
 			valid.SetError(name, tag, ValidateValTypeErr)
 			return
 		}
-		if s < utf8.RuneCount([]byte(vOf.String())) {
+		if s < utf8.RuneCountInString(vOf.String()) {
 			return
 		}
 		valid.SetError(name, tag, fmt.Sprintf(ValidateValNotGtString, s))
-	case reflect.Slice:
+	case reflect.Slice, reflect.Map, reflect.Array:
 		s, err := strconv.Atoi(size)
 		if err != nil {
 			valid.SetError(name, tag, ValidateValTypeErr)
@@ -119,7 +119,7 @@ func (valid *Validation) RuleGt(tOf reflect.StructField, vOf reflect.Value, size
 // RuleGte 大于等于
 // 支持: int8, int32, int, int64,
 // float32, float64,
-// string, slice
+// string, slice, map, array
 func (valid *Validation) RuleGte(tOf reflect.StructField, vOf reflect.Value, size string) {
 	if vOf.IsZero() {
 		return
@@ -157,11 +157,11 @@ func (valid *Validation) RuleGte(tOf reflect.StructField, vOf reflect.Value, siz
 			valid.SetError(name, tag, ValidateValTypeErr)
 			return
 		}
-		if s <= utf8.RuneCount([]byte(vOf.String())) {
+		if s <= utf8.RuneCountInString(vOf.String()) {
 			return
 		}
 		valid.SetError(name, tag, fmt.Sprintf(ValidateValNotGteString, s))
-	case reflect.Slice:
+	case reflect.Slice, reflect.Map, reflect.Array:
 		s, err := strconv.Atoi(size)
 		if err != nil {
 			valid.SetError(name, tag, ValidateValTypeErr)
@@ -181,7 +181,7 @@ func (valid *Validation) RuleGte(tOf reflect.StructField, vOf reflect.Value, siz
 // RuleLt 小于
 // 支持: int8, int32, int, int64,
 // float32, float64,
-// string, slice
+// string, slice, map, array
 func (valid *Validation) RuleLt(tOf reflect.StructField, vOf reflect.Value, size string) {
 	if vOf.IsZero() {
 		return
@@ -218,11 +218,11 @@ func (valid *Validation) RuleLt(tOf reflect.StructField, vOf reflect.Value, size
 			valid.SetError(name, tag, ValidateValTypeErr)
 			return
 		}
-		if s > utf8.RuneCount([]byte(vOf.String())) {
+		if s > utf8.RuneCountInString(vOf.String()) {
 			return
 		}
 		valid.SetError(name, tag, fmt.Sprintf(ValidateValNotLtString, s))
-	case reflect.Slice:
+	case reflect.Slice, reflect.Map, reflect.Array:
 		s, err := strconv.Atoi(size)
 		if err != nil {
 			valid.SetError(name, tag, ValidateValTypeErr)
@@ -242,7 +242,7 @@ func (valid *Validation) RuleLt(tOf reflect.StructField, vOf reflect.Value, size
 // RuleLte 小于等于
 // 支持: int8, int32, int, int64,
 // float32, float64,
-// string, slice
+// string, slice, map, array
 func (valid *Validation) RuleLte(tOf reflect.StructField, vOf reflect.Value, size string) {
 	if vOf.IsZero() {
 		return
@@ -279,11 +279,11 @@ func (valid *Validation) RuleLte(tOf reflect.StructField, vOf reflect.Value, siz
 			valid.SetError(name, tag, ValidateValTypeErr)
 			return
 		}
-		if s >= utf8.RuneCount([]byte(vOf.String())) {
+		if s >= utf8.RuneCountInString(vOf.String()) {
 			return
 		}
 		valid.SetError(name, tag, fmt.Sprintf(ValidateValNotLteString, s))
-	case reflect.Slice:
+	case reflect.Slice, reflect.Map, reflect.Array:
 		s, err := strconv.Atoi(size)
 		if err != nil {
 			valid.SetError(name, tag, ValidateValTypeErr)
@@ -301,7 +301,7 @@ func (valid *Validation) RuleLte(tOf reflect.StructField, vOf reflect.Value, siz
 }
 
 // RuleLen 字符串长度或数值等于期望值
-// 支持: string, slice
+// 支持: string, slice, map, array
 func (valid *Validation) RuleLen(tOf reflect.StructField, vOf reflect.Value, size string) {
 	if vOf.IsZero() {
 		return
@@ -319,11 +319,11 @@ func (valid *Validation) RuleLen(tOf reflect.StructField, vOf reflect.Value, siz
 			valid.SetError(name, tag, ValidateValTypeErr)
 			return
 		}
-		if s == utf8.RuneCount([]byte(vOf.String())) {
+		if s == utf8.RuneCountInString(vOf.String()) {
 			return
 		}
 		valid.SetError(name, tag, fmt.Sprintf(ValidateValNotLenString, s))
-	case reflect.Slice:
+	case reflect.Slice, reflect.Map, reflect.Array:
 		s, err := strconv.Atoi(size)
 		if err != nil {
 			valid.SetError(name, tag, ValidateValTypeErr)
@@ -658,6 +658,26 @@ func (valid *Validation) RuleDistinct(tOf reflect.StructField, vOf reflect.Value
 
 	default:
 		valid.SetError(name, tag, fmt.Sprintf(ValidateMethodNotAllowSth, "distinct", vOf.Interface()))
+	}
+	return
+}
+
+// RuleTrimSpace 字符串去除空格
+// 支持: string
+func (valid *Validation) RuleTrimSpace(tOf reflect.StructField, vOf reflect.Value, _ string) {
+	if vOf.IsZero() {
+		return
+	}
+
+	if vOf.Kind() == reflect.Ptr {
+		vOf = vOf.Elem()
+	}
+	name, tag := tOf.Name, tOf.Tag.Get(NameTag)
+	switch vOf.Kind() {
+	case reflect.String:
+		vOf.SetString(strings.TrimSpace(vOf.String()))
+	default:
+		valid.SetError(name, tag, fmt.Sprintf(ValidateMethodNotAllowSth, "trimSpace", vOf.String()))
 	}
 	return
 }
