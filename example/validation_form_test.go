@@ -148,3 +148,34 @@ func TestGift(t *testing.T) {
 		t.Fatal("result valid err:", v.ErrorsMap)
 	}
 }
+
+type Pager struct {
+	Page     int `json:"pageNum" valid:"default=1" name:"页码"`
+	PageSize int `json:"pageSize" valid:"default=10" name:"页条数"`
+}
+
+// PageListDto
+type PageListDto struct {
+	Pager
+	Keywords string `json:"keywords" valid:"-"`
+	Status   string `json:"status" valid:"default=ENABLED" name:"状态"`
+}
+
+func TestPageList(t *testing.T) {
+
+	data := `{}`
+
+	input := &PageListDto{}
+	err := json.Unmarshal([]byte(data), input)
+	if err != nil {
+		t.Fatal(err)
+	}
+	v := &gvalid.Validation{}
+	b, err := v.Valid(input)
+	if err != nil {
+		t.Fatal("result err:", err)
+	}
+	if !b {
+		t.Fatal("result valid err:", v.ErrorsMap)
+	}
+}

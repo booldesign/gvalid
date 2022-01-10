@@ -468,19 +468,22 @@ func (valid *Validation) RuleSin(tOf reflect.StructField, vOf reflect.Value, siz
 
 // RuleDive 嵌套验证
 func (valid *Validation) RuleDive(tOf reflect.StructField, vOf reflect.Value, _ string) {
-	if vOf.IsZero() {
-		return
-	}
 
 	if vOf.Type().Kind() == reflect.Slice {
-		if vOf.Len() > 0 && !isStructOrStructPtr(vOf.Index(0).Type()) {
+		l := vOf.Len()
+		// 仅支持 slice 类型的 struct
+		if l > 0 && !isStructOrStructPtr(vOf.Index(0).Type()) {
 			return
 		}
-		l := vOf.Len()
 		for i := 0; i < l; i++ {
 			_, _ = valid.Valid(vOf.Index(i))
 		}
-	} else if isStructOrStructPtr(tOf.Type) {
+	} else if isStruct(tOf.Type) {
+		_, _ = valid.Valid(vOf)
+	} else if isStructPtr(tOf.Type) {
+		if vOf.IsZero() {
+			vOf.Set(reflect.New(tOf.Type.Elem()))
+		}
 		_, _ = valid.Valid(vOf)
 	}
 

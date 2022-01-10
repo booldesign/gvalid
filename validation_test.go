@@ -1102,3 +1102,39 @@ func BenchmarkTrimSpace(b *testing.B) {
 	}
 	b.StopTimer()
 }
+
+type Pager struct {
+	Page     int `json:"pageNum" valid:"required,default=1" name:"页码"`
+	PageSize int `json:"pageSize" valid:"required,default=10" name:"页条数"`
+}
+
+type User struct {
+	Age int `json:"age" valid:"required" name:"年龄"`
+}
+
+// PageListDto
+type PageListDto struct {
+	Pager
+	*User
+	Keywords string `json:"keywords" valid:"required" name:"关键词"`
+}
+
+func TestDive(t *testing.T) {
+	var u *PageListDto
+
+	switch mode {
+	case "FAIL":
+		u = &PageListDto{}
+	default:
+		u = &PageListDto{Pager: Pager{Page: 1, PageSize: 10}, User: &User{Age: 1}, Keywords: "卫建文"}
+	}
+
+	v := &Validation{}
+	b, err := v.Valid(u)
+	if err != nil {
+		t.Fatal("result err:", err)
+	}
+	if !b {
+		t.Fatal("result valid err:", v.ErrorsMap)
+	}
+}

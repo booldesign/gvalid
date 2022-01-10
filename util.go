@@ -30,6 +30,13 @@ func isStructOrStructPtr(t reflect.Type) bool {
 // matchValidFunc 匹配验证 func
 func matchValidFunc(f reflect.StructField) (vfs []ValidFunc, err error) {
 	tag := f.Tag.Get(ValidTag)
+	if f.Anonymous && isStructOrStructPtr(f.Type) && tag == "" {
+		vfs = []ValidFunc{
+			// 这边不灵活
+			{Name: "RuleDive", Params: ""},
+		}
+		return
+	}
 	if tag == "" || tag == "-" {
 		return
 	}
