@@ -60,10 +60,23 @@ import "github.com/booldesign/gvalid"
 
 ## 快速开始
 ```
-v = &gvalid.Validation{}
-b, err = v.Valid(u)
+type WUser struct {
+    Name string `valid:"required" name:"姓名"`
+}
+
+u := &WUser{
+    Name: "BoolDesign",
+}
+
+v := &Validation{}
+b, err := v.Valid(u)
 if err != nil {
-    t.Fatal("result err:", err)
+    // TODO: handle error
+    panic(err)
+}
+if !b {
+    // TODO: 捕获验证错误信息
+    fmt.Println(v.ErrorsMap)
 }
 ```
 
@@ -97,22 +110,6 @@ func (a *Account) Valid(v *gvalid.Validation) {
 	}
 }
 ```
-
-
-### 错误信息捕获
-
-```
-v = &gvalid.Validation{}
-b, err = v.Valid(u)
-if err != nil {
-    t.Fatal("result err:", err)
-}
-if !b {
-    t.Fatal("result valid err:", v.ErrorsMap)
-}
-
-```
-
 
 ## 常见问题(FAQ)
 
