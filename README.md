@@ -1,6 +1,7 @@
 # Package gValid
 English | [简体中文](README.zh-CN.md)
 
+[![go.dev reference](https://img.shields.io/badge/go.dev-reference-007d9c?logo=go&logoColor=white&style=flat-square)](https://pkg.go.dev/github.com/booldesign/gvalid)
 ![Project status](https://img.shields.io/badge/version-1.0.0-green.svg)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
@@ -60,10 +61,22 @@ import "github.com/booldesign/gvalid"
 
 ## Quick Start
 ```
-v = &gvalid.Validation{}
-b, err = v.Valid(u)
+type WUser struct {
+    Name string `valid:"required" name:"name"`
+}
+
+u := &WUser{
+    Name: "BoolDesign",
+}
+v := &Validation{}
+b, err := v.Valid(u)
 if err != nil {
-    t.Fatal("result err:", err)
+    // TODO: handle error
+    panic(err)
+}
+if !b {
+    // TODO: validation error messages
+    fmt.Println(v.ErrorsMap)
 }
 ```
 
@@ -97,22 +110,6 @@ func (a *Account) Valid(v *gvalid.Validation) {
 	}
 }
 ```
-
-
-### Error Return Value
-
-```
-v = &gvalid.Validation{}
-b, err = v.Valid(u)
-if err != nil {
-    t.Fatal("result err:", err)
-}
-if !b {
-    t.Fatal("result valid err:", v.ErrorsMap)
-}
-
-```
-
 
 ## FAQ
 
