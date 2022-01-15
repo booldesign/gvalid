@@ -8,11 +8,12 @@ package gvalid
  */
 
 const (
-	ValidTag        = "valid"
-	NameTag         = "name"
-	TagSep          = ","
-	AssignSep       = "="
-	ValidFuncPrefix = "Rule"
+	defaultTagName    = "valid"
+	defaultNameTag    = "name"
+	tagSep            = ","
+	tagKeySep         = "="
+	skipValidationTag = "-"
+	validFuncPrefix   = "Rule"
 )
 
 const (

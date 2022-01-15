@@ -29,7 +29,7 @@ func isStructOrStructPtr(t reflect.Type) bool {
 
 // matchValidFunc 匹配验证 func
 func matchValidFunc(f reflect.StructField) (vfs []ValidFunc, err error) {
-	tag := f.Tag.Get(ValidTag)
+	tag := f.Tag.Get(defaultTagName)
 	if f.Anonymous && isStructOrStructPtr(f.Type) && tag == "" {
 		vfs = []ValidFunc{
 			// 这边不灵活
@@ -37,7 +37,7 @@ func matchValidFunc(f reflect.StructField) (vfs []ValidFunc, err error) {
 		}
 		return
 	}
-	if tag == "" || tag == "-" {
+	if tag == "" || tag == skipValidationTag {
 		return
 	}
 
@@ -45,7 +45,7 @@ func matchValidFunc(f reflect.StructField) (vfs []ValidFunc, err error) {
 		return
 	}
 
-	for _, rule := range strings.Split(tag, TagSep) {
+	for _, rule := range strings.Split(tag, tagSep) {
 		if rule == "" {
 			continue
 		}
@@ -85,19 +85,19 @@ func parseRegexFunc(tag, key string) (vfs []ValidFunc, str string, err error) {
 	if err != nil {
 		return
 	}
-	vfs = []ValidFunc{{ValidFuncPrefix + RegexFunc, reg.String()}}
+	vfs = []ValidFunc{{validFuncPrefix + RegexFunc, reg.String()}}
 	str = strings.TrimSpace(tag[:index]) + strings.TrimSpace(tag[end+len(RegexTagEnd):])
 	return
 }
 
 // parseFunc 匹配要验证的 func
 func parseFunc(rule string) (v ValidFunc, err error) {
-	ruleSlice := strings.Split(strings.TrimSpace(rule), AssignSep)
+	ruleSlice := strings.Split(strings.TrimSpace(rule), tagKeySep)
 	var params string
 	if len(ruleSlice) == 2 {
 		params = ruleSlice[1]
 	}
-	v = ValidFunc{ValidFuncPrefix + toUpperCamel(ruleSlice[0]), params}
+	v = ValidFunc{validFuncPrefix + toUpperCamel(ruleSlice[0]), params}
 	return
 }
 

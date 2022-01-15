@@ -40,7 +40,7 @@ func init() {
 	t := reflect.TypeOf(&Validation{})
 	for i := 0; i < t.NumMethod(); i++ {
 		m := t.Method(i)
-		if strings.HasPrefix(m.Name, ValidFuncPrefix) {
+		if strings.HasPrefix(m.Name, validFuncPrefix) {
 			validFuncMap[m.Name] = m.Func
 		}
 	}
@@ -49,7 +49,7 @@ func init() {
 // RuleRequired 必填
 func (valid *Validation) RuleRequired(tOf reflect.StructField, vOf reflect.Value, _ string) {
 	if vOf.IsZero() {
-		valid.SetError(tOf.Name, tOf.Tag.Get(NameTag), ValidateValCanNotEmpty)
+		valid.SetError(tOf.Name, tOf.Tag.Get(defaultNameTag), ValidateValCanNotEmpty)
 	}
 	return
 }
@@ -67,7 +67,7 @@ func (valid *Validation) RuleGt(tOf reflect.StructField, vOf reflect.Value, size
 		vOf = vOf.Elem()
 	}
 
-	name, tag := tOf.Name, tOf.Tag.Get(NameTag)
+	name, tag := tOf.Name, tOf.Tag.Get(defaultNameTag)
 	switch vOf.Kind() {
 	case reflect.Int8, reflect.Int32, reflect.Int, reflect.Int64:
 		s, err := strconv.Atoi(size)
@@ -129,7 +129,7 @@ func (valid *Validation) RuleGte(tOf reflect.StructField, vOf reflect.Value, siz
 		vOf = vOf.Elem()
 	}
 
-	name, tag := tOf.Name, tOf.Tag.Get(NameTag)
+	name, tag := tOf.Name, tOf.Tag.Get(defaultNameTag)
 	switch vOf.Kind() {
 	case reflect.Int8, reflect.Int32, reflect.Int, reflect.Int64:
 		s, err := strconv.Atoi(size)
@@ -190,7 +190,7 @@ func (valid *Validation) RuleLt(tOf reflect.StructField, vOf reflect.Value, size
 		vOf = vOf.Elem()
 	}
 
-	name, tag := tOf.Name, tOf.Tag.Get(NameTag)
+	name, tag := tOf.Name, tOf.Tag.Get(defaultNameTag)
 	switch vOf.Kind() {
 	case reflect.Int8, reflect.Int32, reflect.Int, reflect.Int64:
 		s, err := strconv.Atoi(size)
@@ -251,7 +251,7 @@ func (valid *Validation) RuleLte(tOf reflect.StructField, vOf reflect.Value, siz
 		vOf = vOf.Elem()
 	}
 
-	name, tag := tOf.Name, tOf.Tag.Get(NameTag)
+	name, tag := tOf.Name, tOf.Tag.Get(defaultNameTag)
 	switch vOf.Kind() {
 	case reflect.Int8, reflect.Int32, reflect.Int, reflect.Int64:
 		s, err := strconv.Atoi(size)
@@ -311,7 +311,7 @@ func (valid *Validation) RuleLen(tOf reflect.StructField, vOf reflect.Value, siz
 		vOf = vOf.Elem()
 	}
 
-	name, tag := tOf.Name, tOf.Tag.Get(NameTag)
+	name, tag := tOf.Name, tOf.Tag.Get(defaultNameTag)
 	switch vOf.Kind() {
 	case reflect.String:
 		s, err := strconv.Atoi(size)
@@ -350,7 +350,7 @@ func (valid *Validation) RuleDate(tOf reflect.StructField, vOf reflect.Value, fo
 		vOf = vOf.Elem()
 	}
 
-	name, tag := tOf.Name, tOf.Tag.Get(NameTag)
+	name, tag := tOf.Name, tOf.Tag.Get(defaultNameTag)
 	switch vOf.Kind() {
 	case reflect.String:
 		if _, err := time.ParseInLocation(format, vOf.String(), loc); err == nil {
@@ -376,7 +376,7 @@ func (valid *Validation) RuleIn(tOf reflect.StructField, vOf reflect.Value, size
 		vOf = vOf.Elem()
 	}
 
-	name, tag := tOf.Name, tOf.Tag.Get(NameTag)
+	name, tag := tOf.Name, tOf.Tag.Get(defaultNameTag)
 	switch vOf.Kind() {
 	case reflect.Int8, reflect.Int32, reflect.Int, reflect.Int64:
 		for _, v := range strings.Split(size, " ") {
@@ -416,7 +416,7 @@ func (valid *Validation) RuleSin(tOf reflect.StructField, vOf reflect.Value, siz
 		vOf = vOf.Elem()
 	}
 
-	name, tag := tOf.Name, tOf.Tag.Get(NameTag)
+	name, tag := tOf.Name, tOf.Tag.Get(defaultNameTag)
 	switch tOf.Type.String() {
 	case "[]int":
 		i := map[int]struct{}{}
@@ -499,12 +499,10 @@ func (valid *Validation) RuleRegex(tOf reflect.StructField, vOf reflect.Value, p
 		return
 	}
 	if m, _ := regexp.MatchString(pattern, vOf.String()); !m {
-		valid.SetError(tOf.Name, tOf.Tag.Get(NameTag), ValidateValNotFormatErr)
+		valid.SetError(tOf.Name, tOf.Tag.Get(defaultNameTag), ValidateValNotFormatErr)
 	}
 	return
 }
-
-var emailPattern = regexp.MustCompile(`^[0-9a-z][_.0-9a-z-]{0,31}@([0-9a-z][0-9a-z-]{0,30}[0-9a-z]\.){1,4}[a-z]{2,4}$`)
 
 // RuleEmail 邮箱验证
 func (valid *Validation) RuleEmail(tOf reflect.StructField, vOf reflect.Value, _ string) {
@@ -512,12 +510,10 @@ func (valid *Validation) RuleEmail(tOf reflect.StructField, vOf reflect.Value, _
 		return
 	}
 	if b := emailPattern.MatchString(vOf.String()); !b {
-		valid.SetError(tOf.Name, tOf.Tag.Get(NameTag), ValidateValNotFormatErr)
+		valid.SetError(tOf.Name, tOf.Tag.Get(defaultNameTag), ValidateValNotFormatErr)
 	}
 	return
 }
-
-var mobilePattern = regexp.MustCompile(`^((\+86)|(86))?1[3456789]\d{9}$`)
 
 // RuleMobile 手机验证
 func (valid *Validation) RuleMobile(tOf reflect.StructField, vOf reflect.Value, _ string) {
@@ -525,12 +521,10 @@ func (valid *Validation) RuleMobile(tOf reflect.StructField, vOf reflect.Value, 
 		return
 	}
 	if b := mobilePattern.MatchString(vOf.String()); !b {
-		valid.SetError(tOf.Name, tOf.Tag.Get(NameTag), ValidateValNotFormatErr)
+		valid.SetError(tOf.Name, tOf.Tag.Get(defaultNameTag), ValidateValNotFormatErr)
 	}
 	return
 }
-
-var base64Pattern = regexp.MustCompile(`^(?:[A-Za-z0-99+/]{4})*(?:[A-Za-z0-9+/]{2}==|[A-Za-z0-9+/]{3}=)?$`)
 
 // RuleBase64 base64 验证
 func (valid *Validation) RuleBase64(tOf reflect.StructField, vOf reflect.Value, _ string) {
@@ -538,12 +532,10 @@ func (valid *Validation) RuleBase64(tOf reflect.StructField, vOf reflect.Value, 
 		return
 	}
 	if b := base64Pattern.MatchString(vOf.String()); !b {
-		valid.SetError(tOf.Name, tOf.Tag.Get(NameTag), ValidateValNotFormatErr)
+		valid.SetError(tOf.Name, tOf.Tag.Get(defaultNameTag), ValidateValNotFormatErr)
 	}
 	return
 }
-
-var ipPattern = regexp.MustCompile(`^((2[0-4]\d|25[0-5]|[01]?\d\d?)\.){3}(2[0-4]\d|25[0-5]|[01]?\d\d?)$`)
 
 // RuleIp ip 验证
 func (valid *Validation) RuleIp(tOf reflect.StructField, vOf reflect.Value, _ string) {
@@ -551,12 +543,10 @@ func (valid *Validation) RuleIp(tOf reflect.StructField, vOf reflect.Value, _ st
 		return
 	}
 	if b := ipPattern.MatchString(vOf.String()); !b {
-		valid.SetError(tOf.Name, tOf.Tag.Get(NameTag), ValidateValNotFormatErr)
+		valid.SetError(tOf.Name, tOf.Tag.Get(defaultNameTag), ValidateValNotFormatErr)
 	}
 	return
 }
-
-var urlPattern = regexp.MustCompile(`^((https|http|ftp):\/\/)(([0-9a-z_!~*'().&=+$%-]+: )?[0-9a-z_!~*'().&=+$%-]+@)?(([0-9]{1,3}.){3}[0-9]{1,3}|([0-9a-z_!~*'()-]+.)*([0-9a-z][0-9a-z-]{0,61})?[0-9a-z].[a-z]{2,6})(:[0-9]{1,4})?((\/?)|(\/[0-9a-z_!~*'().;?:@&=+$,%#-]+)+\/?)$`)
 
 // RuleUrl url验证
 func (valid *Validation) RuleUrl(tOf reflect.StructField, vOf reflect.Value, _ string) {
@@ -564,7 +554,7 @@ func (valid *Validation) RuleUrl(tOf reflect.StructField, vOf reflect.Value, _ s
 		return
 	}
 	if b := urlPattern.MatchString(vOf.String()); !b {
-		valid.SetError(tOf.Name, tOf.Tag.Get(NameTag), ValidateValNotFormatErr)
+		valid.SetError(tOf.Name, tOf.Tag.Get(defaultNameTag), ValidateValNotFormatErr)
 	}
 	return
 }
@@ -575,7 +565,7 @@ func (valid *Validation) RuleIdCard(tOf reflect.StructField, vOf reflect.Value, 
 		return
 	}
 	if b := ValidIdCardCode(vOf.String()); !b {
-		valid.SetError(tOf.Name, tOf.Tag.Get(NameTag), ValidateValNotFormatErr)
+		valid.SetError(tOf.Name, tOf.Tag.Get(defaultNameTag), ValidateValNotFormatErr)
 	}
 	return
 }
@@ -587,7 +577,7 @@ func (valid *Validation) RuleNumeric(tOf reflect.StructField, vOf reflect.Value,
 	}
 	for _, v := range vOf.String() {
 		if v < 48 || v > 57 {
-			valid.SetError(tOf.Name, tOf.Tag.Get(NameTag), ValidateValNotNumericErr)
+			valid.SetError(tOf.Name, tOf.Tag.Get(defaultNameTag), ValidateValNotNumericErr)
 			break
 		}
 	}
@@ -602,7 +592,7 @@ func (valid *Validation) RuleDefault(tOf reflect.StructField, vOf reflect.Value,
 		if vOf.Type().Kind() == reflect.Ptr {
 			vOf = vOf.Elem()
 		}
-		name, tag := tOf.Name, tOf.Tag.Get(NameTag)
+		name, tag := tOf.Name, tOf.Tag.Get(defaultNameTag)
 		switch vOf.Type().Kind() {
 		case reflect.Int8, reflect.Int32, reflect.Int, reflect.Int64:
 			val, err := strconv.Atoi(def)
@@ -629,13 +619,13 @@ func (valid *Validation) RuleDistinct(tOf reflect.StructField, vOf reflect.Value
 	if vOf.Kind() != reflect.Slice {
 		valid.SetError(tOf.Name, "distinct", ValidateValTypeErr)
 	}
-	name, tag := tOf.Name, tOf.Tag.Get(NameTag)
+	name, tag := tOf.Name, tOf.Tag.Get(defaultNameTag)
 	switch vOf.Type().String() {
 	case "[]int":
 		i := map[int]struct{}{}
 		for _, v := range vOf.Interface().([]int) {
 			if _, ok := i[v]; ok {
-				valid.SetError(tOf.Name, tOf.Tag.Get(NameTag), fmt.Sprintf(ValidateValMustDistinct, vOf.Interface()))
+				valid.SetError(tOf.Name, tOf.Tag.Get(defaultNameTag), fmt.Sprintf(ValidateValMustDistinct, vOf.Interface()))
 				return
 			}
 			i[v] = struct{}{}
@@ -644,7 +634,7 @@ func (valid *Validation) RuleDistinct(tOf reflect.StructField, vOf reflect.Value
 		i := map[int64]struct{}{}
 		for _, v := range vOf.Interface().([]int64) {
 			if _, ok := i[v]; ok {
-				valid.SetError(tOf.Name, tOf.Tag.Get(NameTag), fmt.Sprintf(ValidateValMustDistinct, vOf.Interface()))
+				valid.SetError(tOf.Name, tOf.Tag.Get(defaultNameTag), fmt.Sprintf(ValidateValMustDistinct, vOf.Interface()))
 				return
 			}
 			i[v] = struct{}{}
@@ -653,7 +643,7 @@ func (valid *Validation) RuleDistinct(tOf reflect.StructField, vOf reflect.Value
 		i := map[string]struct{}{}
 		for _, v := range vOf.Interface().([]string) {
 			if _, ok := i[v]; ok {
-				valid.SetError(tOf.Name, tOf.Tag.Get(NameTag), fmt.Sprintf(ValidateValMustDistinct, vOf.Interface()))
+				valid.SetError(tOf.Name, tOf.Tag.Get(defaultNameTag), fmt.Sprintf(ValidateValMustDistinct, vOf.Interface()))
 				return
 			}
 			i[v] = struct{}{}
@@ -675,7 +665,7 @@ func (valid *Validation) RuleTrimSpace(tOf reflect.StructField, vOf reflect.Valu
 	if vOf.Kind() == reflect.Ptr {
 		vOf = vOf.Elem()
 	}
-	name, tag := tOf.Name, tOf.Tag.Get(NameTag)
+	name, tag := tOf.Name, tOf.Tag.Get(defaultNameTag)
 	switch vOf.Kind() {
 	case reflect.String:
 		vOf.SetString(strings.TrimSpace(vOf.String()))
